@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatwork 既読化ツール</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f7f9; }
+        h1 { color: #333; }
+        form { display: flex; flex-direction: column; align-items: center; }
+        input[type="password"] { padding: 10px; width: 300px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; background-color: #007bff; color: white; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        #status { margin-top: 20px; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Chatwork 全部屋既読化</h1>
+    <form id="apiForm">
+        <input type="password" id="apiTokenInput" placeholder="ここにAPIトークンを入力" required>
+        <button type="submit">すべての部屋を既読にする</button>
+    </form>
+    <div id="status"></div>
+
+    <script>
+        document.getElementById('apiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const apiToken = document.getElementById('apiTokenInput').value;
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = '既読化処理を開始しました...';
+            statusDiv.style.color = '#007bff';
+            
+            try {
+                const response = await fetch('/mark-as-read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiToken })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.textContent = result.message;
+                    statusDiv.style.color = 'green';
+                } else {
+                    statusDiv.textContent = `エラー: ${result.message || result.error}`;
+                    statusDiv.style.color = 'red';
+                }
+            } catch (error) {
+                statusDiv.textContent = '通信エラーが発生しました。サーバーが起動しているか確認してください。';
+                statusDiv.style.color = 'red';
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
